@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-os.environ['PARL_BACKEND'] = 'fluid'
+# import os
+# os.environ['PARL_BACKEND'] = 'fluid'
 
 import os
 import gym
 import numpy as np
+import paddle
+import paddle.fluid.core as core
 import parl
 from parl.utils import logger, ReplayMemory
 
@@ -31,6 +33,13 @@ MEMORY_WARMUP_SIZE = 200
 BATCH_SIZE = 64
 LEARNING_RATE = 0.0005
 GAMMA = 0.99
+
+def _set_use_system_allocator(value=None):
+    USE_SYSTEM_ALLOCATOR_FLAG = "FLAGS_use_system_allocator"
+    old_value = core.globals()[USE_SYSTEM_ALLOCATOR_FLAG]
+    value = old_value if value is None else value
+    core.globals()[USE_SYSTEM_ALLOCATOR_FLAG] = value
+    return old_value
 
 
 # train an episode
@@ -117,4 +126,13 @@ def main():
 
 
 if __name__ == '__main__':
+    npu_count = int(os.getenv("FLAGS_selected_npus", "-1"))
+    if npu_count < 0:
+        logger.info(
+            'Cannot find available NPU devices, using other devices now.')
+    
+    _set_use_system_allocator(False)
+    # paddle.set_device("cpu")
+    paddle.set_device("npu")
+    # paddle.disable_static(paddle.fluid.NPUPlace(0))
     main()

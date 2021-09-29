@@ -63,6 +63,8 @@ class Agent(AgentBase):
             algorithm (parl.Algorithm): an instance of `parl.Algorithm`. This algorithm is then passed to `self.alg`.
         """
 
+        # print('============================ Agent __init__')
+
         assert isinstance(algorithm, Algorithm)
         super(Agent, self).__init__(algorithm)
 

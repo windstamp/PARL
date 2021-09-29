@@ -15,13 +15,14 @@
 import os
 os.environ['PARL_BACKEND'] = 'fluid'
 
+import paddle
+paddle.enable_static()
+
 import gym
 import numpy as np
-import paddle
 import parl
 from parl.utils import logger, check_version_for_xpu
-check_version_for_xpu()
-paddle.enable_static()
+# check_version_for_xpu()
 
 from cartpole_model import CartpoleModel
 from cartpole_agent import CartpoleAgent
@@ -114,8 +115,8 @@ def main():
 
 
 if __name__ == '__main__':
-    xpu_count = int(os.getenv("FLAGS_selected_xpus", "-1"))
-    if xpu_count < 0:
+    npu_count = int(os.getenv("FLAGS_selected_npus", "-1"))
+    if npu_count < 0:
         logger.info(
-            'Cannot find available XPU devices, using other devices now.')
+            'Cannot find available NPU devices, using other devices now.')
     main()
