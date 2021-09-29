@@ -73,6 +73,8 @@ class Agent(AgentBase):
             algorithm (parl.Algorithm): an instance of `parl.Algorithm`. This algorithm is then passed to `self.alg`.
         """
 
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Agent __init__')
+
         assert isinstance(algorithm, Algorithm)
         super(Agent, self).__init__(algorithm)
 
@@ -86,6 +88,10 @@ class Agent(AgentBase):
             self.place = fluid.CUDAPlace(0)
         else:
             self.place = fluid.CPUPlace()
+        
+        self.place = fluid.NPUPlace(0)
+        print('place: ', self.place)
+
         self.fluid_executor = fluid.Executor(self.place)
         self.fluid_executor.run(fluid.default_startup_program())
 
@@ -115,6 +121,9 @@ class Agent(AgentBase):
 
 
         """
+
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Agent build_program')
+
         raise NotImplementedError
 
     def get_model_ids(self):

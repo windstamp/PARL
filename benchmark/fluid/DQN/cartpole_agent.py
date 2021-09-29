@@ -25,6 +25,9 @@ class CartpoleAgent(parl.Agent):
                  act_dim,
                  e_greed=0.1,
                  e_greed_decrement=0):
+        
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CartpoleAgent __init__')
+        
         assert isinstance(obs_dim, int)
         assert isinstance(act_dim, int)
         self.obs_dim = obs_dim
@@ -38,6 +41,9 @@ class CartpoleAgent(parl.Agent):
         self.e_greed_decrement = e_greed_decrement
 
     def build_program(self):
+        
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CartpoleAgent build_program')
+        
         self.pred_program = fluid.Program()
         self.learn_program = fluid.Program()
 
