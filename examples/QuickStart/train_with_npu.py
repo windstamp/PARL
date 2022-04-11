@@ -16,6 +16,7 @@ import os
 import gym
 import numpy as np
 import paddle
+import paddle.fluid.profiler as pd_profiler
 import parl
 from parl.utils import logger
 from cartpole_model import CartpoleModel
@@ -85,19 +86,27 @@ def main():
     #     exit()
 
     for i in range(1000):
-        obs_list, action_list, reward_list = run_train_episode(agent, env)
-        if i % 10 == 0:
-            logger.info("Episode {}, Reward Sum {}.".format(
-                i, sum(reward_list)))
+        global_step = i
+        if global_step >= 10 and global_step < 20:
+            output_file = os.getcwd() + '/' + 'npu_prof' + '/samples'
+        else:
+            output_file = os.getcwd() + '/' + 'npu_prof' + '/ignore'
+        os.makedirs(output_file, exist_ok=True)
 
-        batch_obs = np.array(obs_list)
-        batch_action = np.array(action_list)
-        batch_reward = calc_reward_to_go(reward_list)
+        with pd_profiler.npu_profiler(output_file) as npu_prof:
+            obs_list, action_list, reward_list = run_train_episode(agent, env)
+            if i % 10 == 0:
+                logger.info("Episode {}, Reward Sum {}.".format(
+                    i, sum(reward_list)))
 
-        agent.learn(batch_obs, batch_action, batch_reward)
-        if (i + 1) % 100 == 0:
-            total_reward = run_evaluate_episodes(agent, env, render=False)
-            logger.info('Test reward: {}'.format(total_reward))
+            batch_obs = np.array(obs_list)
+            batch_action = np.array(action_list)
+            batch_reward = calc_reward_to_go(reward_list)
+
+            agent.learn(batch_obs, batch_action, batch_reward)
+            if (i + 1) % 100 == 0:
+                total_reward = run_evaluate_episodes(agent, env, render=False)
+                logger.info('Test reward: {}'.format(total_reward))
 
     # save the parameters to ./model.ckpt
     agent.save('./model.ckpt')

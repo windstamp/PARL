@@ -20,6 +20,7 @@ import gym
 import numpy as np
 import paddle
 import paddle.fluid.core as core
+import paddle.fluid.profiler as pd_profiler
 import parl
 from parl.utils import logger, ReplayMemory
 
@@ -110,15 +111,23 @@ def main():
     # start training
     episode = 0
     while episode < max_episode:
-        # train part
-        for i in range(50):
-            total_reward = run_train_episode(agent, env, rpm)
-            episode += 1
+        global_step = episode
+        if global_step >= 10 and global_step < 20:
+            output_file = os.getcwd() + '/' + 'npu_prof' + '/samples'
+        else:
+            output_file = os.getcwd() + '/' + 'npu_prof' + '/ignore'
+        os.makedirs(output_file, exist_ok=True)
 
-        # test part
-        eval_reward = run_evaluate_episodes(agent, env, render=False)
-        logger.info('episode:{}    e_greed:{}   Test reward:{}'.format(
-            episode, agent.e_greed, eval_reward))
+        with pd_profiler.npu_profiler(output_file) as npu_prof:
+            # train part
+            for i in range(50):
+                total_reward = run_train_episode(agent, env, rpm)
+                episode += 1
+
+            # test part
+            eval_reward = run_evaluate_episodes(agent, env, render=False)
+            logger.info('episode:{}    e_greed:{}   Test reward:{}'.format(
+                episode, agent.e_greed, eval_reward))
 
     # save the parameters to ./model.ckpt
     save_path = './model.ckpt'
